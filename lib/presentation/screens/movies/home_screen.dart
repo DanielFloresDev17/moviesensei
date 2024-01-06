@@ -32,29 +32,81 @@ class _HomeViewState extends ConsumerState<_HomeView> {
     super.initState();
     
     ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+    ref.read(popularMoviesProvider.notifier).loadNextPage();
+    ref.read(upcomingMoviesProvider.notifier).loadNextPage();
+    ref.read(topRatedMoviesProvider.notifier).loadNextPage();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    final nowPlayingMovies = ref.watch(nowPlayingMoviesProvider);
+    final initalLoading = ref.watch(initialLoadingProvider);
+    if (initalLoading) return const FullScreenLoader();
+
     final slideShowMovies = ref.watch(moviesSlideshowProvider);
-    
-    return Column(
-      children: [
-        
-        const CustomAppbar(),
+    final nowPlayingMovies = ref.watch(nowPlayingMoviesProvider);
+    final popularMovies = ref.watch(popularMoviesProvider);
+    final upcomingMovies = ref.watch(upcomingMoviesProvider);
+    final topRatedMovies = ref.watch(topRatedMoviesProvider);
 
-        MoviesSlideshow(movies: slideShowMovies),
+    return CustomScrollView(
+      slivers: [
 
-        MovieHorizontalListview(
-          movies: nowPlayingMovies,
-          title: 'En cines',
-          subTitle: 'Lunes 20',
-          loadNextPage: () => ref.read(nowPlayingMoviesProvider.notifier).loadNextPage()
-        )
-        
-      ],
+        const SliverAppBar(
+          floating: true,
+          flexibleSpace: FlexibleSpaceBar(
+            title: CustomAppbar(),
+            titlePadding: EdgeInsets.zero,
+            centerTitle: false,
+          ),
+        ),
+
+        SliverList(delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Column(
+              children: [
+                
+                //const CustomAppbar(),
+          
+                MoviesSlideshow(movies: slideShowMovies),
+          
+                MovieHorizontalListview(
+                  movies: nowPlayingMovies,
+                  title: 'En cines',
+                  subTitle: 'Domingo 11',
+                  loadNextPage: () => ref.read(nowPlayingMoviesProvider.notifier).loadNextPage()
+                ),
+          
+                MovieHorizontalListview(
+                  movies: upcomingMovies,
+                  title: 'Próximamente',
+                  subTitle: 'En este mes',
+                  loadNextPage: () => ref.read(upcomingMoviesProvider.notifier).loadNextPage()
+                ),
+                
+                MovieHorizontalListview(
+                  movies: popularMovies,
+                  title: 'Populares',
+                  //subTitle: '',
+                  loadNextPage: () => ref.read(popularMoviesProvider.notifier).loadNextPage()
+                ),
+          
+                MovieHorizontalListview(
+                  movies: topRatedMovies,
+                  title: 'Mejor calificadas',
+                  subTitle: 'Desde siempre',
+                  loadNextPage: () => ref.read(topRatedMoviesProvider.notifier).loadNextPage()
+                ),
+
+                const SizedBox(height: 10),
+
+              ],
+            );          
+          },
+          childCount: 1
+        )),
+
+      ]
     );
   }
 }
