@@ -1,10 +1,12 @@
+import 'package:moviesensei/infrastructure/models/moviedb/movie_details.dart';
 import 'package:dio/dio.dart';
+
 import 'package:moviesensei/config/constants/environment.dart';
 import 'package:moviesensei/domain/datasources/movies_datasource.dart';
-import 'package:moviesensei/domain/entities/movie.dart';
+
 import 'package:moviesensei/infrastructure/mappers/movie_mapper.dart';
-import 'package:moviesensei/infrastructure/models/moviedb/movie_details.dart';
 import 'package:moviesensei/infrastructure/models/moviedb/moviedb_response.dart';
+import 'package:moviesensei/domain/entities/movie.dart';
 
 class MoviedbDatasource extends MoviesDatasource {
   final dio = Dio(BaseOptions(
@@ -85,6 +87,20 @@ class MoviedbDatasource extends MoviesDatasource {
     final Movie movie = MovieMapper.movieDetailsToEntity(movieDetails);
     
     return movie;
+  }
+  
+  @override
+  Future<List<Movie>> searchMovies(String query) async {
+
+    if(query.isEmpty) return [];
+
+    final response = await dio.get('/search/movie',
+      queryParameters: {
+        'query': query
+      }
+    );
+    
+    return _jsonToMovies(response.data);
   }
 
 }
